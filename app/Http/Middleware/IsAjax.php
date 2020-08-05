@@ -1,17 +1,17 @@
-<?php namespace App\Http\Middleware;
+<?php
+
+namespace App\Http\Middleware;
 
 use Closure;
 
-class IsAjax {
+class IsAjax
+{
+    public function handle($request, Closure $next)
+    {
+        if ($request->ajax()) {
+            return $next($request);
+        }
 
-	public function handle($request, Closure $next)
-	{
-		if ($request->ajax())
-		{
-			return $next($request);			
-		}
-
-		abort(404);
-	}
-
+        abort(404);
+    }
 }

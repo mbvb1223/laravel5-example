@@ -1,19 +1,20 @@
-<?php namespace App\Http\Requests;
+<?php
 
-class UserCreateRequest extends Request {
+namespace App\Http\Requests;
 
-	/**
-	 * Get the validation rules that apply to the request.
-	 *
-	 * @return array
-	 */
-	public function rules()
-	{
-		return [
-			'username' => 'required|max:30|alpha|unique:users',
-			'email' => 'required|email|unique:users',
-			'password' => 'required|confirmed|min:8'
-		];
-	}
-
+class UserCreateRequest extends Request
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'username' => 'required|max:30|alpha|unique:users',
+            'email'    => 'required|email|unique:users',
+            'password' => 'required|confirmed|min:8',
+        ];
+    }
 }

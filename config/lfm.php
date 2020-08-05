@@ -12,7 +12,7 @@ return [
 
     // Middlewares which should be applied to all package routes.
     // For laravel 5.1 and before, remove 'web' from the array.
-    'middlewares' => ['web','auth'],
+    'middlewares' => ['web', 'auth'],
 
     // The url to this package. Change it if necessary.
     'prefix' => 'laravel-filemanager',
@@ -60,7 +60,7 @@ return [
     // The default display type for items.
     // Supported: "grid", "list"
     'images_startup_view' => 'grid',
-    'files_startup_view' => 'list',
+    'files_startup_view'  => 'list',
 
     /*
     |--------------------------------------------------------------------------
@@ -81,7 +81,7 @@ return [
     'should_validate_size' => false,
 
     'max_image_size' => 50000,
-    'max_file_size' => 50000,
+    'max_file_size'  => 50000,
 
     // If true, the uploading file's mime type will be valid in valid_image_mimetypes/valid_file_mimetypes.
     'should_validate_mime' => false,
@@ -113,7 +113,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'thumb_img_width' => 200,
+    'thumb_img_width'  => 200,
     'thumb_img_height' => 200,
 
     /*
@@ -164,7 +164,7 @@ return [
     | directives are not supported.
     */
     'php_ini_overrides' => [
-        'memory_limit'        => '256M'
-    ]
+        'memory_limit'        => '256M',
+    ],
 
 ];

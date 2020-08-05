@@ -1,17 +1,18 @@
-<?php namespace App\Http\Requests;
+<?php
 
-class SearchRequest extends Request {
+namespace App\Http\Requests;
 
-	/**
-	 * Get the validation rules that apply to the request.
-	 *
-	 * @return array
-	 */
-	public function rules()
-	{
-		return [
-			'search' => 'required|max:100',
-		];
-	}
-
+class SearchRequest extends Request
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'search' => 'required|max:100',
+        ];
+    }
 }

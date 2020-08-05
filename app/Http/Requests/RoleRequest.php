@@ -1,19 +1,20 @@
-<?php namespace App\Http\Requests;
+<?php
 
-class RoleRequest extends Request {
+namespace App\Http\Requests;
 
-	/**
-	 * Get the validation rules that apply to the request.
-	 *
-	 * @return array
-	 */
-	public function rules()
-	{
-		return [
-			'admin' => 'required|alpha|max:50',
-			'redac' => 'required|alpha|max:50',
-			'user'  => 'required|alpha|max:50'
-		];
-	}
-
+class RoleRequest extends Request
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'admin' => 'required|alpha|max:50',
+            'redac' => 'required|alpha|max:50',
+            'user'  => 'required|alpha|max:50',
+        ];
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
 
     /*
     |--------------------------------------------------------------------------
@@ -13,14 +13,14 @@ return array(
     |
     */
 
-    "password" => "Les mots de passe doivent avoir au moins huit caractères et doivent être identiques.",
+    'password' => 'Les mots de passe doivent avoir au moins huit caractères et doivent être identiques.',
 
-    "user"     => "Aucun utilisateur n'a été trouvé avec cette adresse e-mail.",
+    'user'     => "Aucun utilisateur n'a été trouvé avec cette adresse e-mail.",
 
-    "token"    => "Ce jeton de réinitialisation du mot de passe n'est pas valide.",
+    'token'    => "Ce jeton de réinitialisation du mot de passe n'est pas valide.",
 
-    "sent"     => "Rappel du mot de passe envoyé !",
+    'sent'     => 'Rappel du mot de passe envoyé !',
 
-    "reset"    => "Le mot de passe a été réinitialisé !",
+    'reset'    => 'Le mot de passe a été réinitialisé !',
 
-);
+];

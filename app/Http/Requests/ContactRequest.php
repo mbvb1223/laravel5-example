@@ -1,19 +1,20 @@
-<?php namespace App\Http\Requests;
+<?php
 
-class ContactRequest extends Request {
+namespace App\Http\Requests;
 
-	/**
-	 * Get the validation rules that apply to the request.
-	 *
-	 * @return array
-	 */
-	public function rules()
-	{
-		return [
-			'name' => 'required|max:100',
-			'email' => 'required|email',
-			'message' => 'required|max:1000'
-		];
-	}
-
+class ContactRequest extends Request
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'name'    => 'required|max:100',
+            'email'   => 'required|email',
+            'message' => 'required|max:1000',
+        ];
+    }
 }

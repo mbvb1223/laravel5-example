@@ -1,17 +1,18 @@
-<?php namespace App\Models;
+<?php
 
-use Illuminate\Database\Eloquent\Model;
+namespace App\Models;
+
 use App\Presenters\DatePresenter;
+use Illuminate\Database\Eloquent\Model;
 
-class Contact extends Model  {
+class Contact extends Model
+{
+    use DatePresenter;
 
-	use DatePresenter;
-
-	/**
-	 * The database table used by the model.
-	 *
-	 * @var string
-	 */
-	protected $table = 'contacts';
-
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = 'contacts';
 }

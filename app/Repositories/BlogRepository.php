@@ -2,12 +2,12 @@
 
 namespace App\Repositories;
 
-use App\Models\Post,
-    App\Models\Tag,
-    App\Models\Comment;
+use App\Models\Comment;
+use App\Models\Post;
+use App\Models\Tag;
 
-class BlogRepository extends BaseRepository {
-
+class BlogRepository extends BaseRepository
+{
     /**
      * The Tag instance.
      *
@@ -25,13 +25,17 @@ class BlogRepository extends BaseRepository {
     /**
      * Create a new BlogRepository instance.
      *
-     * @param  App\Models\Post $post
-     * @param  App\Models\Tag $tag
-     * @param  App\Models\Comment $comment
+     * @param App\Models\Post    $post
+     * @param App\Models\Tag     $tag
+     * @param App\Models\Comment $comment
+     *
      * @return void
      */
     public function __construct(
-    Post $post, Tag $tag, Comment $comment) 
+        Post $post,
+        Tag $tag,
+        Comment $comment
+    )
     {
         $this->model = $post;
         $this->tag = $tag;
@@ -41,9 +45,10 @@ class BlogRepository extends BaseRepository {
     /**
      * Create or update a post.
      *
-     * @param  App\Models\Post $post
-     * @param  array  $inputs
-     * @param  bool   $user_id
+     * @param App\Models\Post $post
+     * @param array           $inputs
+     * @param bool            $user_id
+     *
      * @return App\Models\Post
      */
     private function savePost($post, $inputs, $user_id = null)
@@ -78,7 +83,8 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post collection.
      *
-     * @param  int  $n
+     * @param int $n
+     *
      * @return Illuminate\Support\Collection
      */
     public function indexFront($n)
@@ -91,45 +97,48 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post collection.
      *
-     * @param  int  $n
-     * @param  int  $id
+     * @param int $n
+     * @param int $id
+     *
      * @return Illuminate\Support\Collection
      */
     public function indexTag($n, $id)
     {
         $query = $this->queryActiveWithUserOrderByDate();
 
-        return $query->whereHas('tags', function($q) use($id) {
-                            $q->where('tags.id', $id);
-                        })
+        return $query->whereHas('tags', function ($q) use ($id) {
+            $q->where('tags.id', $id);
+        })
                         ->paginate($n);
     }
 
     /**
      * Get search collection.
      *
-     * @param  int  $n
-     * @param  string  $search
+     * @param int    $n
+     * @param string $search
+     *
      * @return Illuminate\Support\Collection
      */
     public function search($n, $search)
     {
         $query = $this->queryActiveWithUserOrderByDate();
 
-        return $query->where(function($q) use ($search) {
-                    $q->where('summary', 'like', "%$search%")
+        return $query->where(function ($q) use ($search) {
+            $q->where('summary', 'like', "%$search%")
                             ->orWhere('content', 'like', "%$search%")
                             ->orWhere('title', 'like', "%$search%");
-                })->paginate($n);
+        })->paginate($n);
     }
 
     /**
      * Get post collection.
      *
-     * @param  int     $n
-     * @param  int     $user_id
-     * @param  string  $orderby
-     * @param  string  $direction
+     * @param int    $n
+     * @param int    $user_id
+     * @param string $orderby
+     * @param string $direction
+     *
      * @return Illuminate\Support\Collection
      */
     public function index($n, $user_id = null, $orderby = 'created_at', $direction = 'desc')
@@ -149,7 +158,8 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post collection.
      *
-     * @param  string  $slug
+     * @param string $slug
+     *
      * @return array
      */
     public function show($slug)
@@ -159,7 +169,7 @@ class BlogRepository extends BaseRepository {
         $comments = $this->comment
                 ->wherePost_id($post->id)
                 ->with('user')
-                ->whereHas('user', function($q) {
+                ->whereHas('user', function ($q) {
                     $q->whereValid(true);
                 })
                 ->get();
@@ -170,7 +180,8 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post collection.
      *
-     * @param  App\Models\Post $post
+     * @param App\Models\Post $post
+     *
      * @return array
      */
     public function edit($post)
@@ -187,7 +198,8 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post collection.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return array
      */
     public function GetByIdWithTags($id)
@@ -198,8 +210,9 @@ class BlogRepository extends BaseRepository {
     /**
      * Update a post.
      *
-     * @param  array  $inputs
-     * @param  App\Models\Post $post
+     * @param array           $inputs
+     * @param App\Models\Post $post
+     *
      * @return void
      */
     public function update($inputs, $post)
@@ -209,7 +222,6 @@ class BlogRepository extends BaseRepository {
         // Tag gestion
         $tags_id = [];
         if (array_key_exists('tags', $inputs) && $inputs['tags'] != '') {
-
             $tags = explode(',', $inputs['tags']);
 
             foreach ($tags as $tag) {
@@ -229,8 +241,9 @@ class BlogRepository extends BaseRepository {
     /**
      * Update "seen" in post.
      *
-     * @param  array  $inputs
-     * @param  int    $id
+     * @param array $inputs
+     * @param int   $id
+     *
      * @return void
      */
     public function updateSeen($inputs, $id)
@@ -245,8 +258,9 @@ class BlogRepository extends BaseRepository {
     /**
      * Update "active" in post.
      *
-     * @param  array  $inputs
-     * @param  int    $id
+     * @param array $inputs
+     * @param int   $id
+     *
      * @return void
      */
     public function updateActive($inputs, $id)
@@ -261,17 +275,17 @@ class BlogRepository extends BaseRepository {
     /**
      * Create a post.
      *
-     * @param  array  $inputs
-     * @param  int    $user_id
+     * @param array $inputs
+     * @param int   $user_id
+     *
      * @return void
      */
     public function store($inputs, $user_id)
     {
-        $post = $this->savePost(new $this->model, $inputs, $user_id);
+        $post = $this->savePost(new $this->model(), $inputs, $user_id);
 
         // Tags gestion
         if (array_key_exists('tags', $inputs) && $inputs['tags'] != '') {
-
             $tags = explode(',', $inputs['tags']);
 
             foreach ($tags as $tag) {
@@ -292,10 +306,12 @@ class BlogRepository extends BaseRepository {
     /**
      * Destroy a post.
      *
-     * @param  App\Models\Post $post
+     * @param App\Models\Post $post
+     *
      * @return void
      */
-    public function destroy($post) {
+    public function destroy($post)
+    {
         $post->tags()->detach();
 
         $post->delete();
@@ -304,7 +320,8 @@ class BlogRepository extends BaseRepository {
     /**
      * Get post slug.
      *
-     * @param  int  $comment_id
+     * @param int $comment_id
+     *
      * @return string
      */
     public function getSlug($comment_id)
@@ -315,12 +332,12 @@ class BlogRepository extends BaseRepository {
     /**
      * Get tag name by id.
      *
-     * @param  int  $tag_id
+     * @param int $tag_id
+     *
      * @return string
      */
     public function getTagById($tag_id)
     {
         return $this->tag->findOrFail($tag_id)->tag;
     }
-
 }

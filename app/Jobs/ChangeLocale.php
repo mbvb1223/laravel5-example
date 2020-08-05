@@ -2,12 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Jobs\Job;
-
 class ChangeLocale extends Job
 {
-	public $lang;
-	
+    public $lang;
+
     /**
      * Execute the job.
      *

@@ -2,197 +2,203 @@
 
 namespace App\Repositories;
 
-use App\Models\User, App\Models\Role;
+use App\Models\Role;
+use App\Models\User;
 
 class UserRepository extends BaseRepository
 {
+    /**
+     * The Role instance.
+     *
+     * @var App\Models\Role
+     */
+    protected $role;
 
-	/**
-	 * The Role instance.
-	 *
-	 * @var App\Models\Role
-	 */	
-	protected $role;
+    /**
+     * Create a new UserRepository instance.
+     *
+     * @param App\Models\User $user
+     * @param App\Models\Role $role
+     *
+     * @return void
+     */
+    public function __construct(
+        User $user,
+        Role $role
+    )
+    {
+        $this->model = $user;
+        $this->role = $role;
+    }
 
-	/**
-	 * Create a new UserRepository instance.
-	 *
-   	 * @param  App\Models\User $user
-	 * @param  App\Models\Role $role
-	 * @return void
-	 */
-	public function __construct(
-		User $user, 
-		Role $role)
-	{
-		$this->model = $user;
-		$this->role = $role;
-	}
+    /**
+     * Save the User.
+     *
+     * @param App\Models\User $user
+     * @param array           $inputs
+     *
+     * @return void
+     */
+    private function save($user, $inputs)
+    {
+        if (isset($inputs['seen'])) {
+            $user->seen = $inputs['seen'] == 'true';
+        } else {
+            $user->username = $inputs['username'];
+            $user->email = $inputs['email'];
 
-	/**
-	 * Save the User.
-	 *
-	 * @param  App\Models\User $user
-	 * @param  Array  $inputs
-	 * @return void
-	 */
-  	private function save($user, $inputs)
-	{		
-		if(isset($inputs['seen'])) 
-		{
-			$user->seen = $inputs['seen'] == 'true';		
-		} else {
+            if (isset($inputs['role'])) {
+                $user->role_id = $inputs['role'];
+            } else {
+                $role_user = $this->role->where('slug', 'user')->first();
+                $user->role_id = $role_user->id;
+            }
+        }
 
-			$user->username = $inputs['username'];
-			$user->email = $inputs['email'];
+        $user->save();
+    }
 
-			if(isset($inputs['role'])) {
-				$user->role_id = $inputs['role'];	
-			} else {
-				$role_user = $this->role->where('slug', 'user')->first();
-				$user->role_id = $role_user->id;
-			}
-		}
+    /**
+     * Get users collection paginate.
+     *
+     * @param int    $n
+     * @param string $role
+     *
+     * @return Illuminate\Support\Collection
+     */
+    public function index($n, $role)
+    {
+        if ($role != 'total') {
+            return $this->model
+            ->with('role')
+            ->whereHas('role', function ($q) use ($role) {
+                $q->whereSlug($role);
+            })
+            ->oldest('seen')
+            ->latest()
+            ->paginate($n);
+        }
 
-		$user->save();
-	}
+        return $this->model
+        ->with('role')
+        ->oldest('seen')
+        ->latest()
+        ->paginate($n);
+    }
 
-	/**
-	 * Get users collection paginate.
-	 *
-	 * @param  int  $n
-	 * @param  string  $role
-	 * @return Illuminate\Support\Collection
-	 */
-	public function index($n, $role)
-	{
-		if($role != 'total')
-		{
-			return $this->model
-			->with('role')
-			->whereHas('role', function($q) use($role) {
-				$q->whereSlug($role);
-			})		
-			->oldest('seen')
-			->latest()
-			->paginate($n);			
-		}
+    /**
+     * Count the users.
+     *
+     * @param string $role
+     *
+     * @return int
+     */
+    public function count($role = null)
+    {
+        if ($role) {
+            return $this->model
+            ->whereHas('role', function ($q) use ($role) {
+                $q->whereSlug($role);
+            })->count();
+        }
 
-		return $this->model
-		->with('role')		
-		->oldest('seen')
-		->latest()
-		->paginate($n);
-	}
+        return $this->model->count();
+    }
 
-	/**
-	 * Count the users.
-	 *
-	 * @param  string  $role
-	 * @return int
-	 */
-	public function count($role = null)
-	{
-		if($role)
-		{
-			return $this->model
-			->whereHas('role', function($q) use($role) {
-				$q->whereSlug($role);
-			})->count();			
-		}
+    /**
+     * Count the users.
+     *
+     * @param string $role
+     *
+     * @return int
+     */
+    public function counts()
+    {
+        $counts = [
+            'admin' => $this->count('admin'),
+            'redac' => $this->count('redac'),
+            'user'  => $this->count('user'),
+        ];
 
-		return $this->model->count();
-	}
+        $counts['total'] = array_sum($counts);
 
-	/**
-	 * Count the users.
-	 *
-	 * @param  string  $role
-	 * @return int
-	 */
-	public function counts()
-	{
-		$counts = [
-			'admin' => $this->count('admin'),
-			'redac' => $this->count('redac'),
-			'user' => $this->count('user')
-		];
+        return $counts;
+    }
 
-		$counts['total'] = array_sum($counts);
+    /**
+     * Create a user.
+     *
+     * @param array $inputs
+     * @param int   $confirmation_code
+     *
+     * @return App\Models\User
+     */
+    public function store($inputs, $confirmation_code = null)
+    {
+        $user = new $this->model();
 
-		return $counts;
-	}
+        $user->password = bcrypt($inputs['password']);
 
-	/**
-	 * Create a user.
-	 *
-	 * @param  array  $inputs
-	 * @param  int    $confirmation_code
-	 * @return App\Models\User 
-	 */
-	public function store($inputs, $confirmation_code = null)
-	{
-		$user = new $this->model;
+        if ($confirmation_code) {
+            $user->confirmation_code = $confirmation_code;
+        } else {
+            $user->confirmed = true;
+        }
 
-		$user->password = bcrypt($inputs['password']);
+        $this->save($user, $inputs);
 
-		if($confirmation_code) {
-			$user->confirmation_code = $confirmation_code;
-		} else {
-			$user->confirmed = true;
-		}
+        return $user;
+    }
 
-		$this->save($user, $inputs);
+    /**
+     * Update a user.
+     *
+     * @param array           $inputs
+     * @param App\Models\User $user
+     *
+     * @return void
+     */
+    public function update($inputs, $user)
+    {
+        $user->confirmed = isset($inputs['confirmed']);
 
-		return $user;
-	}
+        $this->save($user, $inputs);
+    }
 
-	/**
-	 * Update a user.
-	 *
-	 * @param  array  $inputs
-	 * @param  App\Models\User $user
-	 * @return void
-	 */
-	public function update($inputs, $user)
-	{
-		$user->confirmed = isset($inputs['confirmed']);
+    /**
+     * Get statut of authenticated user.
+     *
+     * @return string
+     */
+    public function getStatut()
+    {
+        return session('statut');
+    }
 
-		$this->save($user, $inputs);
-	}
+    /**
+     * Valid user.
+     *
+     * @param bool $valid
+     * @param int  $id
+     *
+     * @return void
+     */
+    public function valid($valid, $id)
+    {
+        $user = $this->getById($id);
 
-	/**
-	 * Get statut of authenticated user.
-	 *
-	 * @return string
-	 */
-	public function getStatut()
-	{
-		return session('statut');
-	}
+        $user->valid = $valid == 'true';
 
-	/**
-	 * Valid user.
-	 *
-     * @param  bool  $valid
-     * @param  int   $id
-	 * @return void
-	 */
-	public function valid($valid, $id)
-	{
-		$user = $this->getById($id);
+        $user->save();
+    }
 
-		$user->valid = $valid == 'true';
-
-		$user->save();
-	}
-
-	/**
-	 * Destroy a user.
-	 *
-	 * @param  App\Models\User $user
-	 * @return void
-	 */
+    /**
+     * Destroy a user.
+     *
+     * @param App\Models\User $user
+     *
+     * @return void
+     */
     public function destroyUser(User $user)
     {
         $user->comments()->delete();
@@ -203,23 +209,23 @@ class UserRepository extends BaseRepository
             $post->tags()->detach();
             $post->delete();
         }
-        
+
         $user->delete();
     }
 
-	/**
-	 * Confirm a user.
-	 *
-	 * @param  string  $confirmation_code
-	 * @return App\Models\User
-	 */
-	public function confirm($confirmation_code)
-	{
-		$user = $this->model->whereConfirmationCode($confirmation_code)->firstOrFail();
+    /**
+     * Confirm a user.
+     *
+     * @param string $confirmation_code
+     *
+     * @return App\Models\User
+     */
+    public function confirm($confirmation_code)
+    {
+        $user = $this->model->whereConfirmationCode($confirmation_code)->firstOrFail();
 
-		$user->confirmed = true;
-		$user->confirmation_code = null;
-		$user->save();
-	}
-
+        $user->confirmed = true;
+        $user->confirmation_code = null;
+        $user->save();
+    }
 }
